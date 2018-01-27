@@ -12,9 +12,15 @@ from remote_access.services.remote_services import get_user_profile_service, get
 
 
 def get_users_province(uids):
+    """
+    获取用户的省份字典
+    :param uids: 用户ID列表
+    :return: 用户的ID字典
+    """
+    uids = [unicode(x) for x in uids]
     params = {'user_ids': uids, 'fields': ['province']}
     client = get_user_profile_service()
-    result = client.getUserProfileInfo(json.dumps(params))
+    result = json.loads(client.getUserProfileInfo(json.dumps(params)))
     uid_province_dict = dict()
     for uid in uids:
         p_info = result.get(uid, None)
@@ -23,7 +29,29 @@ def get_users_province(uids):
             uid_province_dict[uid] = unicode(province)
         else:
             uid_province_dict[uid] = None
-    return result
+    return uid_province_dict
+
+
+def get_doctors_province(dids):
+    """
+    获取医生所在医院的省份和城市
+    :param dids: 医生列表
+    :return: 医生地址字典
+    """
+    dids = [unicode(x) for x in dids]
+    params = {'doctor_ids': dids, 'fields': ['hospital_province', 'hospital_city']}
+    client = get_user_profile_service()
+    result = json.loads(client.getDoctorProfileInfo(json.dumps(params)))
+    did_province_dict = dict()
+    for did in dids:
+        p_info = result.get(did, None)
+        if p_info:
+            province = p_info.get('hospital_province', None)
+            city = p_info.get('hospital_city', None)
+            did_province_dict[did] = (unicode(province), unicode(city))
+        else:
+            did_province_dict[did] = None
+    return did_province_dict
 
 
 def get_user_features(uid, log=False):
@@ -266,13 +294,28 @@ def test_of_get_word_intentions():
 
 
 def test_of_get_users_province():
+    """
+    测试用户的省份数据
+    :return: 
+    """
     uid_list = ['2413643', '57179481']
     res = get_users_province(uid_list)
-    print res
+    print list_2_utf8(res)
+
+
+def test_of_get_doctors_province():
+    """
+    测试用户的省份数据
+    :return: 
+    """
+    did_list = ['clinic_web_18401de5e8bde175', 'clinic_web_b446059733a1e064']
+    res = get_doctors_province(did_list)
+    print list_2_utf8(res)
 
 
 if __name__ == "__main__":
     # test_of_get_user_features()  # 测试用户
     # test_of_get_doctor_features()  # 测试医生
     # test_of_get_word_intentions()  # 测试意图识别
-    test_of_get_users_province()  # 测试用户省份
+    # test_of_get_users_province()  # 测试用户省份
+    test_of_get_doctors_province()  # 测试医生省份

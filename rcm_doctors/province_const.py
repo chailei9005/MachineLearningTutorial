@@ -9,6 +9,7 @@ Created by C.L.Wang
 
 from project_utils import *
 from rcm_doctors.constants import DATA_DIR
+from remote_access.remote_apis import get_users_province, get_doctors_province
 from root_dir import ROOT_DIR
 
 _PROVINCE_STD_DICT = None  # 省份简称的全局变量
@@ -114,14 +115,27 @@ def is_big_city(prv, city):
     return False  # 默认返回False
 
 
-def match_province_user_and_dct(uid, did):
+def match_province_user_and_dcts(uid, did_list):
     """
-    匹配用户和医生的省份
+    匹配用户和医生列表的省份
     :param uid: 用户ID
-    :param did: 医生ID
-    :return: 是否匹配
+    :param did_list: 医生ID列表
+    :return: 匹配省份的医生ID列表
     """
+    uid = unicode(uid)
+    did_list = [unicode(x) for x in did_list]
+    user_province = get_users_province([uid]).get(uid, None)  # 获取用户省份
+    doctors_province = get_doctors_province(did_list)  # 获取医院的省份
 
+    res_list = list()  # 获取相同省份医生列表
+    for did in doctors_province.keys():
+        add_info = doctors_province.get(did, None)
+        print "医生ID: %s, 省份: %s" % (uid, list_2_utf8(add_info))
+        if add_info:
+            if is_big_city(add_info[0], add_info[1]) and (user_province == add_info[0]):
+                res_list.append(did)
+
+    return res_list
 
 
 def test_of_to_province_std():
@@ -131,13 +145,23 @@ def test_of_to_province_std():
     print to_province_std("广西省")
 
 
-def test_of_match_prv_and_city():
+def test_of_is_big_city():
     print is_big_city('河北', u'石家庄')
     print is_big_city(u'辽宁省', '大连')
     print is_big_city('新疆省', u'乌鲁木齐')
     print is_big_city('新疆省', u'齐齐哈尔')
 
 
+def test_of_match_province_user_and_dcts():
+    uid = '57179481'  # 重庆市
+    # 重庆市, 辽宁省, 河北省, 重庆市
+    dids = [u'clinic_web_176d72ee15105284', 'clinic_web_258d483e95d7c204',
+            'clinic_web_644cc8007e0c39dd', 'clinic_web_bc8545ba33e926e1']
+    res = match_province_user_and_dcts(uid, dids)
+    print list_2_utf8(res)
+
+
 if __name__ == '__main__':
     # test_of_to_province_std()  # 测试省份标准名称转换
-    test_of_match_prv_and_city()
+    # test_of_is_big_city()  # 测试大城市判断
+    test_of_match_province_user_and_dcts()  # 测试用户与医生匹配
