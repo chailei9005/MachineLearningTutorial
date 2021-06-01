@@ -67,7 +67,7 @@ texttable==1.2.1
 thrift==0.10.0
 thriftpy==0.3.9
 traceback2==1.4.0
-urllib3==1.22
+urllib3==1.26.5
 user-profile==0.0.9
 Werkzeug==0.14.1
 xlrd==1.1.0
