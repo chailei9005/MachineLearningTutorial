@@ -34,7 +34,7 @@ msgpack==0.5.1
 msgpack-python==0.5.0
 numpy==1.13.1
 olefile==0.44
-opencv-python==3.3.0.9
+opencv-python==3.4.7.28
 openpyxl==2.4.9
 pandas==0.20.3
 pbr==3.1.1
